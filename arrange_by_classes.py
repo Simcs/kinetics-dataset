@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
+import csv
 
 # KINETICS-400
 """     videos      csv         replace
@@ -11,11 +12,16 @@ train:  240258      246534      1392
 val:    19881       19906       0
 """
 
-SPLITS = ['test', 'train', 'val']
+SPLITS = ['train', 'val', 'test']
 
-def load_label(csv):
-    table = np.loadtxt(csv, skiprows=1, dtype=str, delimiter=',')
-    return {k: v.replace('"', '') for k, v in zip(table[:, 1], table[:, 0])}
+def load_label(csv_):
+    # table = np.loadtxt(csv, skiprows=1, dtype=str, delimiter=',')
+    with open(csv_) as f:
+        reader = csv.reader(f)
+        table = np.array(list(reader)[1:])
+        
+    return {k: v.replace('"', '').replace(' ', '_').replace('\'', '-').replace('(', '-').replace(')', '-')
+            for k, v in zip(table[:, 1], table[:, 0])}
 
 def collect_dict(path, split, replace_videos):
     split_video_path = path / split
